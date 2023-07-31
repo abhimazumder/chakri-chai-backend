@@ -1,0 +1,21 @@
+{
+    "JOB_ID": "650112",
+    "JOB_TITLE": "Software Engineer - Entry Level",
+    "JOB_LOCATIONS": {
+        "India": [
+            "Pune",
+            "Bengaluru"
+        ],
+        "South Afrcia": [
+            "Cape Town"
+        ]
+    },
+    "POSTING_DATE": "12/10/22",
+    "APPLICATION_DEADLINE": "20/10/22",
+    "REQUIRED_EXPERIENCE": {
+        "RANGE": {
+            "MINIMUM": 1
+        },
+        "UNIT": "Year"
+    }
+}

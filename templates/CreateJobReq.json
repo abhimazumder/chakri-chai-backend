@@ -1,0 +1,52 @@
+{
+    "Job ID": "-vNLC9wV7",
+    "Job Title": "Software Engineer - Entry Level",
+    "Job Locations": [
+        {
+            "Country": "India",
+            "City": "Kolkata",
+            "ID": 0
+        },
+        {
+            "Country": "India",
+            "City": "Pune",
+            "ID": 1
+        }
+    ],
+    "Posting Date": "Thu Jul 27 2023 12:30:56 GMT+0530 (India Standard Time)",
+    "Application Deadline": "Mon Jul 31 2023 00:00:00 GMT+0530 (India Standard Time)",
+    "Employment Type": "Full-Time",
+    "Work Mode": "Hybrid",
+    "Required Experience": {
+        "RANGE": {
+            "MAXIMUM": "11",
+            "MINIMUM": "0"
+        },
+        "UNIT": "Month"
+    },
+    "Opennings": "1",
+    "Compensation": {
+        "RANGE": {
+            "ABSOLUTE": "30000"
+        },
+        "CURRENCY": "Rupee"
+    },
+    "Description": [
+        {
+            "Section Name": "Job Description",
+            "Content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed fringilla tristique justo, a semper purus scelerisque eu. Nulla facilisi. Vivamus at felis ac elit luctus fermentum. Phasellus dignissim ante eget nunc hendrerit posuere. Mauris sed fermentum nisi. Nullam vulputate dolor nec lorem tristique cursus. Donec consectetur mi vel metus sagittis, ac malesuada odio varius."
+        },
+        {
+            "Section Name": "Educational Qualifications",
+            "Content": "Fusce rhoncus vestibulum tortor, in finibus nulla ullamcorper ac. Nullam ut elit ut libero eleifend facilisis. Sed ultrices mauris nec metus ullamcorper, in commodo nunc lacinia. Nunc pulvinar dapibus diam, vitae rhoncus urna pulvinar eu. Morbi finibus fermentum mi, vitae dignissim libero semper id. Maecenas aliquam nibh ac ex vestibulum, id commodo tortor convallis."
+        },
+        {
+            "Section Name": "Requirements",
+            "Content": "Fusce rhoncus vestibulum tortor, in finibus nulla ullamcorper ac. Nullam ut elit ut libero eleifend facilisis. Sed ultrices mauris nec metus ullamcorper, in commodo nunc lacinia. Nunc pulvinar dapibus diam, vitae rhoncus urna pulvinar eu. Morbi finibus fermentum mi, vitae dignissim libero semper id. Maecenas aliquam nibh ac ex vestibulum, id commodo tortor convallis."
+        },
+        {
+            "Section Name": "Skills",
+            "Content": "React.js, Redux, Material UI, Node.js, Serverless, AWS Lambda, AWS DynamoDB, AWS S3 and GIT."
+        }
+    ]
+}

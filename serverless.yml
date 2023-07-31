@@ -1,0 +1,57 @@
+service: chakri-chai-backend
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  region: ap-south-1
+  runtime: nodejs18.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+        - s3:*
+      Resource: "*"
+
+functions:
+
+  createjob:
+    handler: jobs/createjob.handler
+    events:
+      - http:
+          path: /createjob
+          method: POST
+          cors: true
+
+  getjob:
+    handler: jobs/getjob.handler
+    events:
+      - http:
+          path: /getjob
+          method: POST
+          cors: true
+  
+  joblist:
+    handler: jobs/joblist.handler
+    events:
+      - http:
+          path: /joblist
+          method: POST
+          cors: true
+
+resources:
+  Resources:
+    JobDetails:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: JobDetails
+        AttributeDefinitions:
+          - AttributeName: JOB_ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: JOB_ID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
