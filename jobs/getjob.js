@@ -30,6 +30,7 @@ module.exports.handler = async (event) => {
     }
 
     const {
+      ACTIVE_STATUS,
       JOB_TITLE,
       JOB_LOCATIONS,
       POSTING_DATE,
@@ -54,6 +55,7 @@ module.exports.handler = async (event) => {
     })
 
     const DATA = {
+      ACTIVE_STATUS,
       META_DATA: {
         JOB_ID,
         JOB_TITLE,
@@ -79,7 +81,7 @@ module.exports.handler = async (event) => {
         "Access-Control-Allow-Methods": "POST",
       },
       body: JSON.stringify({
-        DATA: DATA
+        ...DATA
       }),
     };
   } catch (error) {

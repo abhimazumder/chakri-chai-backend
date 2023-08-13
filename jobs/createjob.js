@@ -19,6 +19,7 @@ module.exports.handler = async (event) => {
     }
 
     const {
+      "Active Status" : ACTIVE_STATUS,
       "Job ID": JOB_ID,
       "Job Title": JOB_TITLE,
       "Job Locations": UNFORMATTED_JOB_LOCATIONS,
@@ -32,8 +33,8 @@ module.exports.handler = async (event) => {
       "Description": DESCRIPTION,
     } = DATA;
 
-    if(!JOB_ID || !JOB_TITLE || !UNFORMATTED_JOB_LOCATIONS || !POSTING_DATE || !APPLICATION_DEADLINE){
-        const error = new Error("Missing required fields: Job ID, Job Title, Job Locations, Posting Date or Application Deadline!");
+    if(!JOB_ID || !JOB_TITLE || !POSTING_DATE){
+        const error = new Error("Missing required fields: Job ID, Job Title or Posting Date!");
         error.statusCode = 400;
         throw error;
     }
@@ -41,6 +42,7 @@ module.exports.handler = async (event) => {
     const JOB_LOCATIONS = formatJobLocations(UNFORMATTED_JOB_LOCATIONS);
 
     const ITEM = {
+      ACTIVE_STATUS,
       JOB_ID,
       JOB_TITLE,
       JOB_LOCATIONS,
