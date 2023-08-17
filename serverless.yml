@@ -15,11 +15,19 @@ provider:
 
 functions:
 
+  login:
+    handler: auth/login.handler
+    events:
+      - http:
+          path: /auth/login
+          method: POST
+          cors: true
+
   createjob:
     handler: jobs/createjob.handler
     events:
       - http:
-          path: /createjob
+          path: /jobs/createjob
           method: POST
           cors: true
 
@@ -27,7 +35,7 @@ functions:
     handler: jobs/getjob.handler
     events:
       - http:
-          path: /getjob
+          path: /jobs/getjob
           method: POST
           cors: true
   
@@ -35,7 +43,7 @@ functions:
     handler: jobs/joblist.handler
     events:
       - http:
-          path: /joblist
+          path: /jobs/joblist
           method: POST
           cors: true
 
@@ -50,6 +58,20 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: JOB_ID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    
+    UserDetails:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UserDetails
+        AttributeDefinitions:
+          - AttributeName: EMAIL_ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: EMAIL_ID
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5

@@ -4,9 +4,15 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
   try {
+    if (typeof event.body !== "string") {
+      const error = new Error("Invalid request body. Expected JSON string!");
+      error.statusCode = 400;
+      throw error;
+    }
+
     const requestBody = JSON.parse(event.body);
 
-    if (!requestBody.JOB_ID) {
+    if (!requestBody?.JOB_ID) {
       const error = new Error("Missing required fields: JOB_ID!");
       error.statusCode = 400;
       throw error;
@@ -46,13 +52,13 @@ module.exports.handler = async (event) => {
     const formattedDescription = {};
 
     DESCRIPTION.forEach((description, index) => {
-      const descriptionKey = `section-${index+1}`;
+      const descriptionKey = `section-${index + 1}`;
       formattedDescription[descriptionKey] = {
         SECTION_NAME: description["Section Name"],
         SECTION_ID: descriptionKey,
         CONTENT: description["Content"],
-      }
-    })
+      };
+    });
 
     const DATA = {
       ACTIVE_STATUS,
@@ -68,10 +74,10 @@ module.exports.handler = async (event) => {
           REQUIRED_EXPERIENCE,
           OPENNINGS,
           COMPENSATION,
-        }
+        },
       },
-      DESCRIPTION: formattedDescription
-    }
+      DESCRIPTION: formattedDescription,
+    };
 
     return {
       statusCode: 200,
@@ -81,7 +87,7 @@ module.exports.handler = async (event) => {
         "Access-Control-Allow-Methods": "POST",
       },
       body: JSON.stringify({
-        ...DATA
+        ...DATA,
       }),
     };
   } catch (error) {

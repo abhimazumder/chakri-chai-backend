@@ -4,22 +4,24 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
   try {
-    if (typeof event.body !== "string"){
-        const error = new Error("Invalid request body. Expected JSON string!");
-        error.statusCode = 400;
-        throw error;
+    if (typeof event.body !== "string") {
+      const error = new Error("Invalid request body. Expected JSON string!");
+      error.statusCode = 400;
+      throw error;
     }
 
-    const { DATA } = JSON.parse(event.body);
+    const requestBody = JSON.parse(event.body);
 
-    if(!DATA){
-        const error = new Error("Missing required fields: DATA!");
-        error.statusCode = 400;
-        throw error;
+    if (!requestBody?.DATA) {
+      const error = new Error("Missing required fields: DATA!");
+      error.statusCode = 400;
+      throw error;
     }
+
+    const { DATA } = requestBody;
 
     const {
-      "Active Status" : ACTIVE_STATUS,
+      "Active Status": ACTIVE_STATUS,
       "Job ID": JOB_ID,
       "Job Title": JOB_TITLE,
       "Job Locations": UNFORMATTED_JOB_LOCATIONS,
@@ -28,15 +30,17 @@ module.exports.handler = async (event) => {
       "Employment Type": EMPLOYMENT_TYPE,
       "Work Mode": WORK_MODE,
       "Required Experience": REQUIRED_EXPERIENCE,
-      "Opennings": OPENNINGS,
-      "Compensation": COMPENSATION,
-      "Description": DESCRIPTION,
+      Opennings: OPENNINGS,
+      Compensation: COMPENSATION,
+      Description: DESCRIPTION,
     } = DATA;
 
-    if(!JOB_ID || !JOB_TITLE || !POSTING_DATE){
-        const error = new Error("Missing required fields: Job ID, Job Title or Posting Date!");
-        error.statusCode = 400;
-        throw error;
+    if (!JOB_ID || !JOB_TITLE || !POSTING_DATE) {
+      const error = new Error(
+        "Missing required fields: Job ID, Job Title or Posting Date!"
+      );
+      error.statusCode = 400;
+      throw error;
     }
 
     const JOB_LOCATIONS = formatJobLocations(UNFORMATTED_JOB_LOCATIONS);
@@ -57,9 +61,9 @@ module.exports.handler = async (event) => {
     };
 
     const params = {
-        TableName: "JobDetails",
-        Item: ITEM
-    }
+      TableName: "JobDetails",
+      Item: ITEM,
+    };
 
     await documentClient.put(params).promise();
 
@@ -90,22 +94,22 @@ module.exports.handler = async (event) => {
 };
 
 const formatJobLocations = (unformattedJobLocations) => {
-    const formattedJobLocations = {};
-    unformattedJobLocations.forEach(location => {
-        formattedJobLocations[location["Country"]] = [];
-    })
-    unformattedJobLocations.forEach(location => {
-        formattedJobLocations[location["Country"]].push(location["City"])
-    })
-    return formattedJobLocations;
-}
+  const formattedJobLocations = {};
+  unformattedJobLocations.forEach((location) => {
+    formattedJobLocations[location["Country"]] = [];
+  });
+  unformattedJobLocations.forEach((location) => {
+    formattedJobLocations[location["Country"]].push(location["City"]);
+  });
+  return formattedJobLocations;
+};
 
 // function formatDate(unformattedDate) {
 //     const date = new Date(unformattedDate);
 //     const day = date.getDate();
 //     const month = date.getMonth() + 1;
 //     const year = date.getFullYear().toString().slice(-2);
-  
+
 //     const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
 //     return formattedDate;
 //   }
