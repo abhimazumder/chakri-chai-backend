@@ -22,6 +22,14 @@ functions:
           path: /auth/login
           method: POST
           cors: true
+  
+  refresh:
+    handler: auth/refresh.handler
+    events:
+      - http:
+          path: /auth/refresh
+          method: POST
+          cors: true
 
   createjob:
     handler: jobs/createjob.handler
@@ -63,10 +71,10 @@ resources:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
     
-    UserDetails:
+    UserInformation:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UserDetails
+        TableName: UserInformation
         AttributeDefinitions:
           - AttributeName: EMAIL_ID
             AttributeType: S
@@ -76,4 +84,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+
+    RefreshTokenDetails:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: RefreshTokenDetails
+        AttributeDefinitions:
+          - AttributeName: TOKEN_ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: TOKEN_ID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
 

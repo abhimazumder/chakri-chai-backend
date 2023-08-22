@@ -37,7 +37,7 @@ module.exports.handler = async (event) => {
     ).toString(CryptoJS.enc.Utf8);
 
     const params = {
-      TableName: "UserDetails",
+      TableName: "UserInformation",
       Key: {
         EMAIL_ID: decryptedEmailID,
       },
@@ -62,12 +62,17 @@ module.exports.handler = async (event) => {
       throw error;
     }
 
-    const tokens = createTokens(decryptedEmailID);
+    const tokens = createTokens({emailId: data.Item.EMAIL_ID, userId: data.Item.USER_ID});
 
-    const encryptedEmailID = CryptoJS.AES.encrypt(
-      decryptedEmailID,
-      "fhEGxd8qLMxvfIU1Cp4RguD/7o0pUsvCfjkeID2Qh8w="
-    ).toString();
+    const USER = {};
+
+    Object.entries(data?.Item).forEach(([key, value]) => {
+      if (key !== "PASSWORD")
+        USER[key] = CryptoJS.AES.encrypt(
+          value,
+          process.env.CRYPTO_SECRET_KEY
+        ).toString();
+    });
 
     return {
       statusCode: 200,
@@ -76,7 +81,7 @@ module.exports.handler = async (event) => {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "POST",
       },
-      body: JSON.stringify({ ...tokens, USER: encryptedEmailID }),
+      body: JSON.stringify({ ...tokens, USER }),
     };
   } catch (error) {
     return {

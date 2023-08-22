@@ -1,9 +1,18 @@
 const AWS = require("aws-sdk");
+const { verifyToken } = require("../utils/verifyToken");
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
   try {
+    // const verifiedToken = verifyToken(event.headers.Authorization);
+
+    if (!verifiedToken) {
+      const error = new Error("Unauthorized.");
+      error.statusCode = 401;
+      throw error;
+    }
+
     if (typeof event.body !== "string") {
       const error = new Error("Invalid request body. Expected JSON string!");
       error.statusCode = 400;

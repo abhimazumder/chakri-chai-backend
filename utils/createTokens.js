@@ -8,7 +8,7 @@ const createTokens = (payload) => {
     { user: payload, type: "ACCESS_TOKEN" },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: "45m",
+      expiresIn: "15m",
     }
   );
 
@@ -16,7 +16,7 @@ const createTokens = (payload) => {
     { user: payload, type: "REFRESH_TOKEN" },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: "10d",
+      expiresIn: "15d",
     }
   );
 
