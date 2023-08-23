@@ -1,6 +1,13 @@
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
 function verifyToken(authorizationHeader) {
   if (!authorizationHeader) {
-    return null;
+    const error = new Error("Missing Authorization Token.");
+    error.statusCode = 401;
+    throw error;
   }
 
   const token = authorizationHeader.split(" ")[1];

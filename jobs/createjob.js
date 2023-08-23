@@ -5,7 +5,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
   try {
-    // const verifiedToken = verifyToken(event.headers.Authorization);
+    const verifiedToken = verifyToken(event.headers.Authorization);
 
     if (!verifiedToken) {
       const error = new Error("Unauthorized.");
@@ -30,6 +30,7 @@ module.exports.handler = async (event) => {
     const { DATA } = requestBody;
 
     const {
+      "User ID": USER_ID,
       "Active Status": ACTIVE_STATUS,
       "Job ID": JOB_ID,
       "Job Title": JOB_TITLE,
@@ -39,14 +40,14 @@ module.exports.handler = async (event) => {
       "Employment Type": EMPLOYMENT_TYPE,
       "Work Mode": WORK_MODE,
       "Required Experience": REQUIRED_EXPERIENCE,
-      Opennings: OPENNINGS,
-      Compensation: COMPENSATION,
-      Description: DESCRIPTION,
+      "Opennings": OPENNINGS,
+      "Compensation": COMPENSATION,
+      "Description": DESCRIPTION,
     } = DATA;
 
-    if (!JOB_ID || !JOB_TITLE || !POSTING_DATE) {
+    if (!USER_ID || !ACTIVE_STATUS.toString() || !JOB_ID || !JOB_TITLE || !POSTING_DATE) {
       const error = new Error(
-        "Missing required fields: Job ID, Job Title or Posting Date!"
+        "Missing required fields: User ID, Job ID, Job Title or Posting Date!"
       );
       error.statusCode = 400;
       throw error;
@@ -55,6 +56,7 @@ module.exports.handler = async (event) => {
     const JOB_LOCATIONS = formatJobLocations(UNFORMATTED_JOB_LOCATIONS);
 
     const ITEM = {
+      USER_ID,
       ACTIVE_STATUS,
       JOB_ID,
       JOB_TITLE,

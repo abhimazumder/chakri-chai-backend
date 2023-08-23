@@ -36,6 +36,7 @@ module.exports.handler = async (event) => {
     }
 
     const {
+      USER_ID,
       ACTIVE_STATUS,
       JOB_TITLE,
       JOB_LOCATIONS,
@@ -61,6 +62,7 @@ module.exports.handler = async (event) => {
     });
 
     const DATA = {
+      USER_ID,
       ACTIVE_STATUS,
       META_DATA: {
         JOB_ID,

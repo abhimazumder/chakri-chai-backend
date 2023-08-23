@@ -54,6 +54,22 @@ functions:
           path: /jobs/joblist
           method: POST
           cors: true
+  
+  jobpostings:
+    handler: jobs/jobpostings.handler
+    events:
+      - http:
+          path: /jobs/jobpostings
+          method: POST
+          cors: true
+
+  toggleactivestatus:
+    handler: jobs/toggleactivestatus.handler
+    events:
+      - http:
+          path: /jobs/toggleactivestatus
+          method: POST
+          cors: true
 
 resources:
   Resources:
@@ -85,6 +101,20 @@ resources:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
 
+    ApplicationDetails:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ApplicationDetails
+        AttributeDefinitions:
+          - AttributeName: APPLICATION_ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: APPLICATION_ID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    
     RefreshTokenDetails:
       Type: AWS::DynamoDB::Table
       Properties:
