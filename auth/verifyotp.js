@@ -1,8 +1,8 @@
 const AWS = require("aws-sdk");
 const CryptoJS = require("crypto-js");
 const bcrypt = require("bcryptjs");
-const { createAuthTokens } = require("../utils/createTokens");
 const dotenv = require("dotenv");
+const { createAuthTokens } = require("../utils/createTokens");
 
 dotenv.config();
 
@@ -18,58 +18,64 @@ module.exports.handler = async (event) => {
 
     const requestBody = JSON.parse(event.body);
 
-    if (!requestBody?.EMAIL_ID || !requestBody?.PASSWORD) {
-      const error = new Error("Missing required fields: EMAIL_ID or PASSWORD!");
+    if (!requestBody?.SESSION_ID && !requestBody?.OTP) {
+      const error = new Error("Missing required fields: SESSION_ID or OTP!");
       error.statusCode = 400;
       throw error;
     }
 
-    const { EMAIL_ID, PASSWORD } = requestBody;
+    const { SESSION_ID, OTP } = requestBody;
 
-    const decryptedEmailID = CryptoJS.AES.decrypt(
-      EMAIL_ID,
+    const decryptedSessionID = CryptoJS.AES.decrypt(
+      SESSION_ID,
       process.env.CRYPTO_SECRET_KEY
     ).toString(CryptoJS.enc.Utf8);
 
-    const decryptedPassword = CryptoJS.AES.decrypt(
-      PASSWORD,
+    const decryptedOTP = CryptoJS.AES.decrypt(
+      OTP,
       process.env.CRYPTO_SECRET_KEY
     ).toString(CryptoJS.enc.Utf8);
 
     const params = {
-      TableName: "UserInformation",
+      TableName: "OTPDetails",
       Key: {
-        EMAIL_ID: decryptedEmailID,
+        SESSION_ID: decryptedSessionID,
       },
     };
 
     const data = await documentClient.get(params).promise();
 
-    if (!data?.Item) {
-      const error = new Error("Email address is not registered.");
-      error.statusCode = 404;
-      throw error;
-    }
-
-    const result = await bcrypt.compare(
-      decryptedPassword,
-      data?.Item?.PASSWORD
-    );
+    const result = await bcrypt.compare(decryptedOTP, data?.Item?.OTP_DATA);
 
     if (!result) {
-      const error = new Error("Invalid credentials.");
+      const error = new Error("Invalid OTP entered");
       error.statusCode = 401;
       throw error;
     }
 
+    if (new Date() > new Date(data?.Item?.EXPIRE_AT)) {
+      const error = new Error("OTP has expired");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const userParams = {
+      TableName: "UserInformation",
+      Key: {
+        EMAIL_ID: data?.Item?.EMAIL_ID,
+      },
+    };
+
+    const userData = await documentClient.get(userParams).promise();
+
     const tokens = createAuthTokens({
-      emailId: data.Item.EMAIL_ID,
-      userId: data.Item.USER_ID,
+      emailId: userData.Item.EMAIL_ID,
+      userId: userData.Item.USER_ID,
     });
 
     const USER = {};
 
-    Object.entries(data?.Item).forEach(([key, value]) => {
+    Object.entries(userData?.Item).forEach(([key, value]) => {
       if (key !== "PASSWORD")
         USER[key] = CryptoJS.AES.encrypt(
           value,

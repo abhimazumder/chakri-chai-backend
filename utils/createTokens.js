@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const createTokens = (payload) => {
+const createAuthTokens = (payload) => {
   const accessToken = jwt.sign(
     { user: payload, type: "ACCESS_TOKEN" },
     process.env.JWT_SECRET_KEY,
@@ -26,4 +26,16 @@ const createTokens = (payload) => {
   };
 };
 
-module.exports = { createTokens };
+const createTemporaryToken = (payload) => {
+  return {
+    TEMPORARY_TOKEN : jwt.sign(
+      { user: payload, type: "TEMPORARY_TOKEN" },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "5m",
+      }
+    )
+  };
+} 
+
+module.exports = { createAuthTokens, createTemporaryToken };

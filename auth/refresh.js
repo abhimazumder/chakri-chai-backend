@@ -2,7 +2,7 @@ const AWS = require("aws-sdk");
 const jwt = require("jsonwebtoken");
 const CryptoJS = require("crypto-js");
 const uuid = require("uuid");
-const { createTokens } = require("../utils/createTokens");
+const { createAuthTokens } = require("../utils/createTokens");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -53,7 +53,7 @@ module.exports.handler = async (event) => {
 
       await documentClient.put(params).promise();
 
-      const newTokens = createTokens(decoded.user);
+      const newTokens = createAuthTokens(decoded.user);
 
       return {
         statusCode: 200,
