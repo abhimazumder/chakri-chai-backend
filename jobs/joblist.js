@@ -13,10 +13,21 @@ module.exports.handler = async (event) => {
 
     const requestBody = JSON.parse(event.body);
 
-    const { COUNTRY, CITY, EXPERIENCE } = requestBody;
+    if (!requestBody.USER_ID) {
+      const error = new Error("Missing required fields: USER_ID!");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const { USER_ID, COUNTRY, CITY, EXPERIENCE } = requestBody;
 
     const params = {
       TableName: "JobDetails",
+      FilterExpression: "USER_ID = :userId AND ACTIVE_STATUS = :activeStatus",
+      ExpressionAttributeValues: {
+        ":userId": USER_ID,
+        ":activeStatus": true,
+      },
       ProjectionExpression:
         "JOB_ID, JOB_TITLE, JOB_LOCATIONS, POSTING_DATE, APPLICATION_DEADLINE, REQUIRED_EXPERIENCE",
     };
@@ -50,7 +61,7 @@ module.exports.handler = async (event) => {
 };
 
 function filterData(Items, COUNTRY = null, CITY = null, EXPERIENCE = null) {
-  if (EXPERIENCE !== "") {
+  if (EXPERIENCE) {
     Items = filterByExperience(Items, EXPERIENCE);
   }
   return Items;
