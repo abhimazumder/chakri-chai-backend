@@ -63,6 +63,14 @@ functions:
           path: /jobs/getjob
           method: POST
           cors: true
+
+  deletejob:
+    handler: jobs/deletejob.handler
+    events:
+      - http:
+          path: /jobs/deletejob
+          method: POST
+          cors: true
   
   joblist:
     handler: jobs/joblist.handler
@@ -88,6 +96,14 @@ functions:
           method: POST
           cors: true
 
+  dashboardcontent:
+    handler: user/dashboardcontent.handler
+    events:
+      - http:
+          path: /user/dashboardcontent
+          method: POST
+          cors: true
+
 resources:
   Resources:
     JobDetails:
@@ -104,10 +120,10 @@ resources:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
     
-    UserInformation:
+    UserDetails:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UserInformation
+        TableName: UserDetails
         AttributeDefinitions:
           - AttributeName: EMAIL_ID
             AttributeType: S
@@ -151,10 +167,10 @@ resources:
       Properties:
         TableName: OTPDetails
         AttributeDefinitions:
-          - AttributeName: SESSION_ID
+          - AttributeName: SESSION_TOKEN
             AttributeType: S
         KeySchema:
-          - AttributeName: SESSION_ID
+          - AttributeName: SESSION_TOKEN
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5

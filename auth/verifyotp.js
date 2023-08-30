@@ -18,16 +18,16 @@ module.exports.handler = async (event) => {
 
     const requestBody = JSON.parse(event.body);
 
-    if (!requestBody?.SESSION_ID && !requestBody?.OTP) {
-      const error = new Error("Missing required fields: SESSION_ID or OTP!");
+    if (!requestBody?.SESSION_TOKEN && !requestBody?.OTP) {
+      const error = new Error("Missing required fields: SESSION_TOKEN or OTP!");
       error.statusCode = 400;
       throw error;
     }
 
-    const { SESSION_ID, OTP } = requestBody;
+    const { SESSION_TOKEN, OTP } = requestBody;
 
-    const decryptedSessionID = CryptoJS.AES.decrypt(
-      SESSION_ID,
+    const decryptedSessionToken = CryptoJS.AES.decrypt(
+      SESSION_TOKEN,
       process.env.CRYPTO_SECRET_KEY
     ).toString(CryptoJS.enc.Utf8);
 
@@ -39,7 +39,7 @@ module.exports.handler = async (event) => {
     const params = {
       TableName: "OTPDetails",
       Key: {
-        SESSION_ID: decryptedSessionID,
+        SESSION_TOKEN: decryptedSessionToken,
       },
     };
 
@@ -60,7 +60,7 @@ module.exports.handler = async (event) => {
     }
 
     const userParams = {
-      TableName: "UserInformation",
+      TableName: "UserDetails",
       Key: {
         EMAIL_ID: data?.Item?.EMAIL_ID,
       },

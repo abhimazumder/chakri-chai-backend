@@ -34,7 +34,7 @@ module.exports.handler = async (event) => {
     ).toString(CryptoJS.enc.Utf8);
 
     const UserParams = {
-      TableName: "UserInformation",
+      TableName: "UserDetails",
       Key: {
         EMAIL_ID: decryptedEmailID,
       },
@@ -55,15 +55,15 @@ module.exports.handler = async (event) => {
     });
     const encryptedOTP = await bcrypt.hash(OTP, 10);
 
-    const sessionID = shortid.generate();
-    const encryptedSessionID = CryptoJS.AES.encrypt(
-      sessionID,
+    const sessionToken = shortid.generate();
+    const encryptedSessionToken = CryptoJS.AES.encrypt(
+      sessionToken,
       process.env.CRYPTO_SECRET_KEY
     ).toString();
     const OTPParams = {
       TableName: "OTPDetails",
       Item: {
-        SESSION_ID: sessionID,
+        SESSION_TOKEN: sessionToken,
         EMAIL_ID: decryptedEmailID,
         OTP_DATA: encryptedOTP,
         CREATED_AT: new Date().toISOString(),
@@ -106,7 +106,7 @@ module.exports.handler = async (event) => {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "POST",
       },
-      body: JSON.stringify({ SESSION_ID: encryptedSessionID }),
+      body: JSON.stringify({ SESSION_TOKEN: encryptedSessionToken }),
     };
   } catch (error) {
     return {

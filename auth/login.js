@@ -37,7 +37,7 @@ module.exports.handler = async (event) => {
     ).toString(CryptoJS.enc.Utf8);
 
     const params = {
-      TableName: "UserInformation",
+      TableName: "UserDetails",
       Key: {
         EMAIL_ID: decryptedEmailID,
       },
@@ -70,7 +70,7 @@ module.exports.handler = async (event) => {
     const USER = {};
 
     Object.entries(data?.Item).forEach(([key, value]) => {
-      if (key !== "PASSWORD")
+      if (key !== "PASSWORD" || key !== "FIRST_NAME" || key !== "LAST_NAME")
         USER[key] = CryptoJS.AES.encrypt(
           value,
           process.env.CRYPTO_SECRET_KEY
