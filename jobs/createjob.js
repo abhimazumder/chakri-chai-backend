@@ -69,6 +69,7 @@ module.exports.handler = async (event) => {
       OPENNINGS,
       COMPENSATION,
       DESCRIPTION,
+      TOTAL_APPLICATIONS: 0,
     };
 
     const params = {

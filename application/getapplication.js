@@ -1,18 +1,9 @@
 const AWS = require("aws-sdk");
-const { verifyToken } = require("../utils/verifyToken");
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
   try {
-    const verifiedToken = verifyToken(event.headers.Authorization);
-
-    if (!verifiedToken) {
-      const error = new Error("Unauthorized.");
-      error.statusCode = 401;
-      throw error;
-    }
-
     if (typeof event.body !== "string") {
       const error = new Error("Invalid request body. Expected JSON string!");
       error.statusCode = 400;
@@ -21,25 +12,39 @@ module.exports.handler = async (event) => {
 
     const requestBody = JSON.parse(event.body);
 
-    if (!requestBody?.USER_ID) {
-      const error = new Error("Missing required fields: USER_ID!");
+    if (!requestBody?.APPLICATION_ID) {
+      const error = new Error("Missing required fields: APPLICATION_ID");
       error.statusCode = 400;
       throw error;
     }
 
-    const { USER_ID } = requestBody;
+    const { APPLICATION_ID } = requestBody;
 
     const params = {
-      TableName: "JobDetails",
-      FilterExpression: "USER_ID = :userId",
-      ExpressionAttributeValues: {
-        ":userId": USER_ID,
+      TableName: "ApplicationDetails",
+      Key: {
+        APPLICATION_ID,
       },
-      ProjectionExpression:
-        "JOB_ID, JOB_TITLE, POSTING_DATE, APPLICATION_DEADLINE, TOTAL_APPLICATIONS, ACTIVE_STATUS",
     };
 
-    const { Items } = await documentClient.scan(params).promise();
+    let { Item } = await documentClient.get(params).promise();
+
+    if (Item.APPLICATION_STATUS && Item.APPLICATION_STATUS !== "VIEWED") {
+      const updateParams = {
+        TableName: "ApplicationDetails",
+        Key: {
+          APPLICATION_ID,
+        },
+        UpdateExpression: `SET APPLICATION_STATUS = :value`,
+        ExpressionAttributeValues: {
+          ":value": "VIEWED",
+        },
+        ReturnValues: "UPDATED_NEW",
+      };
+
+      const data = await documentClient.update(updateParams).promise();
+      Item = data.Item;
+    }
 
     return {
       statusCode: 200,
@@ -48,7 +53,9 @@ module.exports.handler = async (event) => {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "POST",
       },
-      body: JSON.stringify({ Items }),
+      body: JSON.stringify({
+        Item,
+      }),
     };
   } catch (error) {
     return {

@@ -1,7 +1,8 @@
 const AWS = require("aws-sdk");
 const { verifyToken } = require("../utils/verifyToken");
+const CryptoJS = require("crypto-js");
 
-const documentClient = new AWS.DynamoDB.DocumentClient();
+const s3 = new AWS.S3();
 
 module.exports.handler = async (event) => {
   try {
@@ -21,25 +22,43 @@ module.exports.handler = async (event) => {
 
     const requestBody = JSON.parse(event.body);
 
-    if (!requestBody?.USER_ID) {
-      const error = new Error("Missing required fields: USER_ID!");
+    if (!requestBody?.OBJ_KEY) {
+      const error = new Error("Missing required fields: OBJ_KEY!");
       error.statusCode = 400;
       throw error;
     }
 
-    const { USER_ID } = requestBody;
+    const { OBJ_KEY } = requestBody;
 
-    const params = {
-      TableName: "JobDetails",
-      FilterExpression: "USER_ID = :userId",
-      ExpressionAttributeValues: {
-        ":userId": USER_ID,
-      },
-      ProjectionExpression:
-        "JOB_ID, JOB_TITLE, POSTING_DATE, APPLICATION_DEADLINE, TOTAL_APPLICATIONS, ACTIVE_STATUS",
+    const decryptedObjKey = CryptoJS.AES.decrypt(
+      OBJ_KEY,
+      process.env.CRYPTO_SECRET_KEY
+    ).toString(CryptoJS.enc.Utf8);
+
+    const extensionToMimetype = {
+      pdf: "application/pdf",
+      doc: "application/msword",
+      docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     };
 
-    const { Items } = await documentClient.scan(params).promise();
+    const fileExtension = decryptedObjKey.split(".").pop().toLowerCase();
+    const mimeType =
+      extensionToMimetype[fileExtension] || "application/octet-stream";
+
+    const params = {
+      Bucket: "chakri-chai-backend-dev-resumebucket-u9y8kwv5j2hm",
+      Key: decryptedObjKey,
+      Expires: 3600,
+      ResponseContentDisposition: "inline",
+      ResponseContentType: mimeType,
+    };
+
+    const preSignedURL = s3.getSignedUrl("getObject", params);
+
+    const encryptedPreSignedURL = CryptoJS.AES.encrypt(
+      preSignedURL,
+      process.env.CRYPTO_SECRET_KEY
+    ).toString();
 
     return {
       statusCode: 200,
@@ -48,7 +67,9 @@ module.exports.handler = async (event) => {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "POST",
       },
-      body: JSON.stringify({ Items }),
+      body: JSON.stringify({
+        URL: encryptedPreSignedURL,
+      }),
     };
   } catch (error) {
     return {

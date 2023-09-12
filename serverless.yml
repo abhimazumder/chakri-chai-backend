@@ -15,7 +15,6 @@ provider:
       Resource: "*"
 
 functions:
-
   login:
     handler: auth/login.handler
     events:
@@ -39,7 +38,7 @@ functions:
           path: /auth/verifyotp
           method: POST
           cors: true
-  
+
   refresh:
     handler: auth/refresh.handler
     events:
@@ -71,7 +70,7 @@ functions:
           path: /jobs/deletejob
           method: POST
           cors: true
-  
+
   joblist:
     handler: jobs/joblist.handler
     events:
@@ -79,7 +78,7 @@ functions:
           path: /jobs/joblist
           method: POST
           cors: true
-  
+
   jobpostings:
     handler: jobs/jobpostings.handler
     events:
@@ -104,6 +103,46 @@ functions:
           method: POST
           cors: true
 
+  getjobtitles:
+    handler: user/getjobtitles.handler
+    events:
+      - http:
+          path: /user/getjobtitles
+          method: POST
+          cors: true
+
+  getapplications:
+    handler: user/getapplications.handler
+    events:
+      - http:
+          path: /user/getapplications
+          method: POST
+          cors: true
+
+  getresume:
+    handler: user/getresume.handler
+    events:
+      - http:
+          path: /user/getresume
+          method: POST
+          cors: true
+
+  submit:
+    handler: application/submit.handler
+    events:
+      - http:
+          path: /application/submit
+          method: POST
+          cors: true
+
+  getapplication:
+    handler: application/getapplication.handler
+    events:
+      - http:
+          path: /application/getapplication
+          method: POST
+          cors: true
+
 resources:
   Resources:
     JobDetails:
@@ -119,7 +158,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-    
+
     UserDetails:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -147,7 +186,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-    
+
     RefreshTokenDetails:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -176,4 +215,18 @@ resources:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
 
-
+    ResumeBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: Private
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedMethods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+              AllowedHeaders:
+                - "*"

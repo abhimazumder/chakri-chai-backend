@@ -1,5 +1,6 @@
 const AWS = require("aws-sdk");
 const { verifyToken } = require("../utils/verifyToken");
+const CryptoJS = require("crypto-js");
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
@@ -29,17 +30,31 @@ module.exports.handler = async (event) => {
 
     const { USER_ID } = requestBody;
 
+    const decryptedUserID = CryptoJS.AES.decrypt(
+      USER_ID,
+      process.env.CRYPTO_SECRET_KEY
+    ).toString(CryptoJS.enc.Utf8);
+
     const params = {
       TableName: "JobDetails",
       FilterExpression: "USER_ID = :userId",
       ExpressionAttributeValues: {
-        ":userId": USER_ID,
+        ":userId": decryptedUserID,
       },
-      ProjectionExpression:
-        "JOB_ID, JOB_TITLE, POSTING_DATE, APPLICATION_DEADLINE, TOTAL_APPLICATIONS, ACTIVE_STATUS",
+      ProjectionExpression: "JOB_TITLE, JOB_ID",
     };
 
-    const { Items } = await documentClient.scan(params).promise();
+    const {Items} = await documentClient.scan(params).promise();
+
+    const jobTitles = [];
+
+    for(const Item of Items){
+        jobTitles.push({
+            VALUE: Item.JOB_TITLE,
+            ID: Item.JOB_ID,
+            DISABLED: false
+        })
+    }
 
     return {
       statusCode: 200,
@@ -48,7 +63,9 @@ module.exports.handler = async (event) => {
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "POST",
       },
-      body: JSON.stringify({ Items }),
+      body: JSON.stringify({
+        Items: jobTitles,
+      }),
     };
   } catch (error) {
     return {

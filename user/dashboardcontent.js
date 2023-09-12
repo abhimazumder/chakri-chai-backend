@@ -6,13 +6,13 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
   try {
-    // const verifiedToken = verifyToken(event.headers.Authorization);
+    const verifiedToken = verifyToken(event.headers.Authorization);
 
-    // if (!verifiedToken) {
-    //   const error = new Error("Unauthorized.");
-    //   error.statusCode = 401;
-    //   throw error;
-    // }
+    if (!verifiedToken) {
+      const error = new Error("Unauthorized.");
+      error.statusCode = 401;
+      throw error;
+    }
 
     if (typeof event.body !== "string") {
       const error = new Error("Invalid request body. Expected JSON string!");
@@ -60,32 +60,56 @@ module.exports.handler = async (event) => {
       ExpressionAttributeValues: {
         ":userId": USER_ID,
       },
-      ProjectionExpression: "JOB_ID, JOB_TITLE, ACTIVE_STATUS, POSTING_DATE",
+      ProjectionExpression:
+        "JOB_ID, JOB_TITLE, TOTAL_APPLICATIONS, ACTIVE_STATUS, POSTING_DATE",
     };
 
     let { Items: JobItems } = await documentClient.scan(jobsParam).promise();
 
-    JobItems = JobItems.sort((a, b) => new Date(b.POSTING_DATE) - new Date(a.POSTING_DATE)).slice(0, 3);
+    JobItems = JobItems.sort(
+      (a, b) => new Date(b.POSTING_DATE) - new Date(a.POSTING_DATE)
+    ).slice(0, 3);
 
     const RecentJobItems = {};
 
     for (const Item of JobItems) {
-      const params = {
-        TableName: "ApplicationDetails",
-        FilterExpression: "JOB_ID = :jobId",
-        ExpressionAttributeValues: {
-          ":jobId": Item.JOB_ID,
-        },
-      };
-
-      const { Count } = await documentClient.scan(params).promise();
-
       RecentJobItems[Item.JOB_ID] = {
-        JOB_ID : Item.JOB_ID,
+        JOB_ID: Item.JOB_ID,
         JOB_TITLE: Item.JOB_TITLE,
-        TOTAL_APPLICATIONS : Count,
-        ACTIVE_STATUS: Item.ACTIVE_STATUS
-      }
+        TOTAL_APPLICATIONS: Item.TOTAL_APPLICATIONS,
+        ACTIVE_STATUS: Item.ACTIVE_STATUS,
+      };
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
+
+    const applicationsParams = {
+      TableName: "ApplicationDetails",
+      FilterExpression: "JOB_POSTER_USER_ID = :userId",
+      ExpressionAttributeValues: {
+        ":userId": USER_ID,
+      },
+      ProjectionExpression:
+        "APPLICATION_ID, FIRST_NAME, LAST_NAME, JOB_TITLE, APPLIED_ON",
+    };
+
+    let { Items: ApplicationItems } = await documentClient
+      .scan(applicationsParams)
+      .promise();
+
+    ApplicationItems = ApplicationItems.sort(
+      (a, b) => new Date(b.APPLIED_ON) - new Date(a.APPLIED_ON)
+    ).slice(0, 3);
+
+    const RecentApplicationItems = {};
+
+    for (const Item of ApplicationItems) {
+      RecentApplicationItems[Item.APPLICATION_ID] = {
+        APPLICATION_ID: Item.APPLICATION_ID,
+        APPLICANT_NAME: `${Item.FIRST_NAME} ${Item.LAST_NAME}`,
+        JOB_TITLE: Item.JOB_TITLE,
+        APPLIED_ON: Item.APPLIED_ON,
+      };
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +123,7 @@ module.exports.handler = async (event) => {
       },
       body: JSON.stringify({
         RECENT_JOB_POSTINGS: RecentJobItems,
-        RECENT_JOB_APPLICATIONS: {},
+        RECENT_JOB_APPLICATIONS: RecentApplicationItems,
       }),
     };
   } catch (error) {
